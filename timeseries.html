@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet</title>
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+   crossorigin=""/>
+</head>
+<style>
+    body {
+        margin:0;
+    }
+
+    #map {
+        height: 100vh;
+        width:100%;
+    }
+
+    /* custom popup content */
+    .popup-content{
+        margin-top:-18px;
+        box-shadow: 1px 1px 0.2em #343434;
+    }
+
+    .popup-content .header{
+        padding: 5px;
+        color:#3a3939;
+        font-weight:bold;
+        text-align: center;
+        font-size: 1.5em;
+    }
+
+    .leaflet-popup-content p {
+        text-align: center;
+        margin: 0 0 8px 0;
+    }
+
+    .leaflet-popup-content p > strong{
+        font-size: 1.7em;
+    }
+
+    .leaflet-popup-content{
+        margin: 0 !important;
+    }
+    .leaflet-popup-content-wrapper{
+        /*padding: 0px !important;*/
+        overflow: hidden;
+        width: 230px;
+        border-radius: 0;
+        
+    }
+
+    .leaflet-popup-close-button{
+        color:#3a3939 !important;
+        font-size: 1.2em;
+    }
+
+    .legend {
+        color:#fff;
+    }
+
+    .outer-box {
+        display: flex;
+        text-align: center;
+    }
+
+    .box {
+        padding:1em 2em;
+    }
+
+    .outer-box small {
+        margin: 4px 0 0 10px;
+        font-size: 1em;
+    }
+
+    .red {
+        background-color: red;
+    }
+
+    .green {
+        background-color: green;
+    }
+
+    .beige {
+        background-color: beige;
+    }
+
+    .leaflet-container {
+        background-color: #fff;
+    }
+
+    .leaflet-marker-icon.leaflet-div-icon {
+        background-color: transparent;
+        border: none;
+        margin-top: -10px !important;
+        margin-left: -10px !important;
+        width: 24px !important;
+        display: inline-flex;
+    }
+
+    .labels {
+        color:#00000070;
+        font-size: 0.69em;
+        text-transform: uppercase;
+    }
+
+    .title {
+        position: absolute;
+        top:2%;
+        right:10%;
+        font-weight: 900;
+        font-size: 2em;
+        color:#C1C1C1;
+        z-index: 1000;
+    }
+</style>
+<body>
+    <div id="map">
+    </div >
+    <div class="title">
+        <h3 id="text-year">2015</h3>
+    <div>
+
+    </div>
+
+    <!-- embed -->
+    <!-- <iframe src="https://davincikab.github.io/funding_webmap/all.html" frameborder="0" height="400" width="100%"></iframe> -->
+    <script src="js/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+        crossorigin=""></script>
+    <script src="leaflet-timeline-slider.js"></script>
+    <script>
+        // Creating map object
+        var map = L.map("map", {
+            center: [36.15561783381855, -6.899414062500001],
+            zoom: 11,
+            minZoom:6,
+            zoomDelta:1
+        });
+
+        var internsData;
+        var textYear = document.getElementById('text-year');
+        // Adding tile layer
+        var layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}' + (L.Browser.retina ? '@2x.png' : '.png'), {
+            attribution:'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20,
+            minZoom: 0
+        });
+
+        layer.addTo(map);
+
+        var cartoWhite = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}' + (L.Browser.retina ? '@2x.png' : '.png'), {
+            attribution:'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20,
+            minZoom: 0
+        });
+
+        // cartoWhite.addTo(map);
+
+        baseLayers ={
+            'Carto Dark':layer
+        };
+
+        var chicago = L.geoJson(null, {
+            style:function(feature) {
+                return {
+                    fillColor:styleChicago(feature),
+                    fillOpacity:0.7,
+                    weight:0.8,
+                    color:'#dddd'
+                }
+            },
+            onEachFeature:function(feature, layer){
+
+                    // add popup
+                    let popupContent = "<div class='popup-content'>"+
+                                "<h3 class='header'>"+ feature.properties.zip +"</h3>"+
+                                "</div><p><strong>"+feature.properties.intakeRate +"</strong> <br> </p>";
+                    layer.bindPopup(popupContent);
+
+                    // zoom to layer on click
+                    layer.on('click', function(e) {
+                        let targetLayer = e.target;
+                        // map.fitBounds(targetLayer.getBounds());
+
+                        // map.flyTo(e.latlng, 7);
+                    });
+                }
+            
+        });
+
+        function styleChicago(feature) {
+            let colors = ['#fee5d9','#fcae91','#fb6a4a','#de2d26','#a50f15'];
+            let value = feature.properties.intakeRate;
+
+            return value <= 1 ? colors[0]: value < 2 ? colors[1]: value < 3 ? colors[2]: value < 4 ? colors[3] : colors[4];
+            // return value < 1 ? colors[0]: value < 2 ? colors[1]: value < 3 ? colors[2]: value < 4 ? colors[3] : colors[5];
+        }
+
+
+        chicago.addTo(map);
+
+        fetch('/interns.json')
+            .then(res =>  res.json())
+            .then(data => {
+                internsData = data;
+                let internData = data.map(dt => dt["HIRE DATE"].includes('2015'))
+                loadGeoData(data);
+            })
+            .catch(error => {
+                alert(error);
+            });
+        
+        function loadGeoData(interData) {
+
+            var total = interData.length;
+            fetch('/chicago_zipcodes.geojson')
+            .then(res => res.json())
+            .then(data => {
+
+                data.features = data.features.map(ft => {
+                    if(ft.properties.zip) {
+                        return ft;
+                    }
+                    
+                }).filter(ft => ft);
+
+                // add contributios
+                data.features.forEach(feature => {
+                    let intake = interData.filter(datum => datum["Zip Code"] == feature.properties.zip);
+                    feature.properties.intakeRate = intake.length * 100 / total;
+                    return feature;
+                });
+
+                // get the rates
+                chicago.addData(data);
+                map.fitBounds(chicago.getBounds());
+                // map.setMaxBounds(chicago.getBounds());
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        }
+
+
+        // legend
+        var legendControl = new L.Control({position:'bottomright'});
+        legendControl.onAdd = function(map) {
+            let div = L.DomUtil.create('div','legend');
+            
+            let colors = ['#fee5d9','#fcae91','#fb6a4a','#de2d26','#a50f15'];
+            div.innerHTML += '<b>% Intern Intake </b>';
+
+            div.innerHTML += '<div class="outer-box"><div style="background-color:'+colors[0]+';" class="box"></div><small>  < 1</small></div>';
+            div.innerHTML += '<div class="outer-box"><div style="background-color:'+colors[1]+';" class="box"></div><small>  < 2</small></div>';
+            div.innerHTML += '<div class="outer-box"><div style="background-color:'+colors[2]+';" class="box"></div> <small> < 3</small></div>';
+            div.innerHTML += '<div class="outer-box"><div style="background-color:'+colors[3]+';" class="box"></div><small>  < 4</small></div>';
+            div.innerHTML += '<div class="outer-box"><div style="background-color:'+colors[4]+';" class="box"></div> <small>  > 4</small></div>';
+
+            return div;
+        }
+
+        map.addControl(legendControl);
+
+        // year filter
+        function getDataAddMarkers({label, value, map, exclamation}) {
+            if(label != 2015 ) {
+                let data = internsData.map(dt => {
+                    if(dt["HIRE DATE"].includes(label.toString())) {
+                        return dt
+                    } 
+                }).filter(dt => dt);
+
+                var total = data.length;
+                chicago.eachLayer(layer => {
+                    let intake = data.filter(datum => datum["Zip Code"] == layer.feature.properties.zip);
+                    layer.feature.properties.intakeRate = intake.length * 100 / total;
+
+                    // update style
+                    layer.setStyle({
+                        fillColor:styleChicago(layer.feature)
+                    });
+
+                });
+            }
+
+            // update year
+            textYear.textContent = label;
+        }
+
+        L.control.timelineSlider({
+                position: 'bottomleft',
+                timelineItems: [2015, 2016, 2017, 2018, 2019, 2020], 
+                changeMap: getDataAddMarkers,
+                activeColor: "#a50f15",
+                inactiveColor: "#8e8e8e",
+                extraChangeMapParams: {exclamation: "Hello World!"} })
+            .addTo(map);
+    </script>
+</body>
+
+</html>
