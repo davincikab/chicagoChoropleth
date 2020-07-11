@@ -217,7 +217,7 @@
 
         chicago.addTo(map);
 
-        fetch('/interns.json')
+        fetch('interns.json')
             .then(res =>  res.json())
             .then(data => {
                 loadGeoData(data);
@@ -228,7 +228,7 @@
         
         function loadGeoData(interData) {
             var total = interData.length;
-            fetch('/chicago_zipcodes.geojson')
+            fetch('chicago_zipcodes.geojson')
             .then(res => res.json())
             .then(data => {
 
