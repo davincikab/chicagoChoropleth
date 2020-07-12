@@ -58,9 +58,9 @@
     .leaflet-popup-content-wrapper{
         /*padding: 0px !important;*/
         overflow: hidden;
-        width: 230px;
+        width: 130px;
         border-radius: 0;
-        
+        background-color: #ffffffc7;
     }
 
     .leaflet-popup-close-button{
@@ -190,7 +190,7 @@
                     // add popup
                     let popupContent = "<div class='popup-content'>"+
                                 "<h3 class='header'>"+ feature.properties.zip +"</h3>"+
-                                "</div><p><strong>"+feature.properties.intakeRate +"</strong> <br> </p>";
+                                "</div><p><strong>"+feature.properties.intakeRate +"%</strong> <br> </p>";
                     layer.bindPopup(popupContent);
 
                     // zoom to layer on click
@@ -242,7 +242,7 @@
                 // add contributios
                 data.features.forEach(feature => {
                     let intake = interData.filter(datum => datum["Zip Code"] == feature.properties.zip);
-                    feature.properties.intakeRate = intake.length * 100 / total;
+                    feature.properties.intakeRate = (intake.length * 100 / total).toFixed(3);
                     return feature;
                 });
 

@@ -60,7 +60,7 @@
         overflow: hidden;
         width: 230px;
         border-radius: 0;
-        
+        background-color: #ffffffc7;
     }
 
     .leaflet-popup-close-button{
@@ -190,10 +190,7 @@
             onEachFeature:function(feature, layer){
 
                     // add popup
-                    let popupContent = "<div class='popup-content'>"+
-                                "<h3 class='header'>"+ feature.properties.zip +"</h3>"+
-                                "</div><p><strong>"+feature.properties.intakeRate +"</strong> <br> </p>";
-                    layer.bindPopup(popupContent);
+                    layer.bindPopup(setPopupContent(feature));
 
                     // zoom to layer on click
                     layer.on('click', function(e) {
@@ -214,7 +211,12 @@
             // return value < 1 ? colors[0]: value < 2 ? colors[1]: value < 3 ? colors[2]: value < 4 ? colors[3] : colors[5];
         }
 
-
+        function setPopupContent(feature) {
+            let popupContent = "<div class='popup-content'>"+
+                                "<h3 class='header'>"+ feature.properties.zip +"</h3>"+
+                                "</div><p><strong>"+feature.properties.intakeRate +"</strong> <br> </p>";
+            return popupContent;
+        }
         chicago.addTo(map);
 
         fetch('interns.json')
@@ -245,7 +247,12 @@
                 // add contributios
                 data.features.forEach(feature => {
                     let intake = interData.filter(datum => datum["Zip Code"] == feature.properties.zip);
-                    feature.properties.intakeRate = intake.length * 100 / total;
+                    if(intake[0]) {
+                        feature.properties.intakeRate = (intake.length * 100 / total).toFixed(3);
+                    } else {
+                        feature.properties.intakeRate = 0;
+                    }
+                   
                     return feature;
                 });
 
@@ -291,13 +298,19 @@
                 var total = data.length;
                 chicago.eachLayer(layer => {
                     let intake = data.filter(datum => datum["Zip Code"] == layer.feature.properties.zip);
-                    layer.feature.properties.intakeRate = intake.length * 100 / total;
+                    if(intake[0]) {
+                        layer.feature.properties.intakeRate = (intake.length * 100 / total).toFixed(3);;
+                    } else {
+                        layer.feature.properties.intakeRate = 0;
+                    }
+                    
 
                     // update style
                     layer.setStyle({
                         fillColor:styleChicago(layer.feature)
                     });
 
+                    layer.bindPopup(setPopupContent(layer.feature));
                 });
             }
 
