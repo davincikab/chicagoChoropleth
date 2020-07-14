@@ -214,7 +214,7 @@
         function setPopupContent(feature) {
             let popupContent = "<div class='popup-content'>"+
                                 "<h3 class='header'>"+ feature.properties.zip +"</h3>"+
-                                "</div><p><strong>"+feature.properties.intakeRate +"</strong> <br> </p>";
+                                "</div><p><strong>Intake:  "+feature.properties.intakeCount +"</strong> <br> </p>";
             return popupContent;
         }
         chicago.addTo(map);
@@ -249,8 +249,10 @@
                     let intake = interData.filter(datum => datum["Zip Code"] == feature.properties.zip);
                     if(intake[0]) {
                         feature.properties.intakeRate = (intake.length * 100 / total).toFixed(3);
+                        feature.properties.intakeCount = intake.length;
                     } else {
                         feature.properties.intakeRate = 0;
+                        feature.properties.intakeCount = 0;
                     }
                    
                     return feature;
@@ -299,9 +301,11 @@
                 chicago.eachLayer(layer => {
                     let intake = data.filter(datum => datum["Zip Code"] == layer.feature.properties.zip);
                     if(intake[0]) {
-                        layer.feature.properties.intakeRate = (intake.length * 100 / total).toFixed(3);;
+                        layer.feature.properties.intakeRate = (intake.length * 100 / total).toFixed(3);
+                        layer.feature.properties.intakeCount = intake.length;
                     } else {
                         layer.feature.properties.intakeRate = 0;
+                        layer.properties.intakeCount = intake.length;
                     }
                     
 

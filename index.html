@@ -190,7 +190,7 @@
                     // add popup
                     let popupContent = "<div class='popup-content'>"+
                                 "<h3 class='header'>"+ feature.properties.zip +"</h3>"+
-                                "</div><p><strong>"+feature.properties.intakeRate +"%</strong> <br> </p>";
+                                "</div><p><strong>Intake:  "+feature.properties.intakeCount +"</strong> <br> </p>";
                     layer.bindPopup(popupContent);
 
                     // zoom to layer on click
@@ -243,6 +243,7 @@
                 data.features.forEach(feature => {
                     let intake = interData.filter(datum => datum["Zip Code"] == feature.properties.zip);
                     feature.properties.intakeRate = (intake.length * 100 / total).toFixed(3);
+                    feature.properties.intakeCount = intake.length;
                     return feature;
                 });
 
